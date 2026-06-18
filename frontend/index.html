@@ -47,6 +47,10 @@ body{margin:0;font:14px/1.55 var(--sans);background:var(--bg);color:var(--fg);
 input,textarea,select,button{font:inherit;color:var(--fg);border-radius:var(--r-sm);padding:8px 10px;
   background:var(--input);border:1px solid var(--input-line);outline:none;letter-spacing:-0.01em}
 input:focus,textarea:focus,select:focus{border-color:var(--primary)}
+/* checkboxes must NOT inherit the padded/bordered text-input look */
+input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;width:14px;height:14px;flex:0 0 auto;
+  padding:0;margin:0;border:0;border-radius:0;background:none;accent-color:var(--primary);
+  vertical-align:middle;cursor:pointer}
 input::placeholder,textarea::placeholder{color:var(--faint)}
 textarea{width:100%;min-height:150px;font:12px/1.5 var(--mono);resize:vertical}
 button{cursor:pointer;background:var(--line);border-color:transparent;font-weight:500;transition:.12s}
@@ -66,7 +70,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .ok{color:var(--primary)}.fail{color:var(--bad)}.warnc{color:var(--warn)}
 small{color:var(--mut)}
 label.fld{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--mut)}
-label.fld input,label.fld select{width:100%}
+label.fld input:not([type=checkbox]),label.fld select{width:100%}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .pre{font:11.5px/1.5 var(--mono);background:var(--input);border:1px solid var(--input-line);border-radius:var(--r-sm);
   padding:11px 13px;white-space:pre-wrap;max-height:300px;overflow:auto;color:#cfd3cf}
