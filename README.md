@@ -7,6 +7,8 @@ never leave the machine.** Apple Silicon, MIT-licensed open core.
 
 > Most fine-tuning tools help you train. This one helps you not deceive yourself about whether it worked.
 
+![MLX Master Trainer — a walkthrough of the disciplined fine-tuning loop](docs/demo.gif)
+
 ## What it is
 An honest end-to-end loop, in order — each step unlocks the next:
 
