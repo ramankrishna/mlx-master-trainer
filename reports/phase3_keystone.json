@@ -1,0 +1,91 @@
+{
+  "base": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "project": "data-keystone",
+  "checks": {
+    "raw_persisted": {
+      "pass": true,
+      "detail": "raw.jsonl written"
+    },
+    "baseline_ran": {
+      "pass": true,
+      "detail": "base terse pass_rate=72.7"
+    },
+    "filter_rejects_violators": {
+      "pass": true,
+      "detail": "kept 22/32 (68.8%) \u00b7 rejected {'terse': 10}"
+    },
+    "bucketed_report": {
+      "pass": true,
+      "detail": "reject examples surfaced: 3"
+    },
+    "dataset_frozen": {
+      "pass": true,
+      "detail": "DATASET.lock holds"
+    },
+    "hand_rescue": {
+      "pass": true,
+      "detail": "rescued -> n_kept 23"
+    },
+    "prereg_committed": {
+      "pass": true,
+      "detail": "bar pass_rate>=98"
+    },
+    "filter_equals_grade_standard": {
+      "pass": true,
+      "detail": "filter eval terse-1781743223 == prereg eval terse-1781743223"
+    },
+    "filtered_trains": {
+      "pass": true,
+      "detail": "final loss 0.12"
+    },
+    "gate_graded_by_same_standard": {
+      "pass": true,
+      "detail": "terse pass_rate base 72.7 -> trained 95.5 (bar 98) \u00b7 default discard"
+    },
+    "semantic_warning_shown": {
+      "pass": true,
+      "detail": "the contamination check is LEXICAL"
+    },
+    "near_dup_pass_works": {
+      "pass": true,
+      "detail": "9 flagged \u00b7 char-3gram Jaccard (heuristic, pure-local \u2014 NOT learned embeddings)"
+    },
+    "data_audit_runs": {
+      "pass": true,
+      "detail": "32 examples \u00b7 32 distinct outputs \u00b7 0 exact dup \u00b7 top phrasing 3.1% \u00b7 lengths ok"
+    },
+    "provenance_intact": {
+      "pass": true,
+      "detail": "{\"raw\": true, \"filter_report\": true, \"filtered\": true, \"dataset_lock\": true, \"eval_lock\": true, \"baseline\": true, \"prereg_lock\": true, \"adapter_manifest\": true,"
+    }
+  },
+  "filter_report": {
+    "n_raw": 32,
+    "n_kept": 22,
+    "n_rejected": 10,
+    "kept_pct": 68.8,
+    "buckets": {
+      "terse": 10
+    },
+    "source_label": "reuse:eval:terse"
+  },
+  "gate": {
+    "base_pr": 72.7,
+    "trained_pr": 95.5,
+    "bar": 98,
+    "default_decision": "discard"
+  },
+  "provenance": {
+    "raw": true,
+    "filter_report": true,
+    "filtered": true,
+    "dataset_lock": true,
+    "eval_lock": true,
+    "baseline": true,
+    "prereg_lock": true,
+    "adapter_manifest": true,
+    "gate": true
+  },
+  "runtime_s": 6.9,
+  "KEYSTONE_PASS": true
+}

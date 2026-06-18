@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "MLX Master Trainer",
+  "version": "0.1.0",
+  "identifier": "com.falconhash.mlx-master-trainer",
+  "build": {
+    "frontendDist": "../../frontend"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "MLX Master Trainer",
+        "width": 1040,
+        "height": 760,
+        "minWidth": 820,
+        "minHeight": 560,
+        "resizable": true,
+        "visible": true,
+        "skipTaskbar": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: asset: https://asset.localhost; connect-src 'self' http://127.0.0.1:8808 http://localhost:8808"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "category": "DeveloperTool",
+    "copyright": "Copyright © 2026 Falcon Hash. All rights reserved.",
+    "shortDescription": "Local MLX LoRA fine-tuning studio — pure-local, model-agnostic.",
+    "longDescription": "Menu-bar app for fine-tuning any MLX-compatible base with LoRA on Apple Silicon: pick a base, ingest any SFT schema with a templated preview, run a memory-guarded LoRA pass with live loss, export GGUF/fused/adapter. Pure-local — data and models never leave the Mac.",
+    "icon": [
+      "icons/icon.icns",
+      "icons/tray-idle-Template.png"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    }
+  },
+  "plugins": {}
+}

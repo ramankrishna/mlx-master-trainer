@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MLX Master Trainer</title>
+<style>
+/* Unsloth-Studio-style tokens, reused from the BigBugAI Bro studio (provenance). */
+:root{
+  --bg:#1a1b1e; --card:#222427; --line:#2e3035; --input:#1f2023; --input-line:#3a3d42;
+  --fg:#d4d4d4; --mut:#999999; --faint:#6b6e74;
+  --primary:oklch(0.7511 0.1407 166.2284); --primary-ink:#0f1714;
+  --primary-soft:oklch(0.7511 0.1407 166.2284 / 0.13);
+  --warn:#e0a93a; --warn-soft:#2a2310; --bad:#e5666b; --bad-soft:#2a1717;
+  --r:10px; --r-sm:7px; --r-lg:14px;
+  --sans:'Inter',-apple-system,'SF Pro Display',system-ui,sans-serif;
+  --mono:'JetBrains Mono','SF Mono',ui-monospace,'Fira Code',monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font:14px/1.55 var(--sans);background:var(--bg);color:var(--fg);
+  -webkit-font-smoothing:antialiased;letter-spacing:-0.01em}
+.app{display:flex;height:100vh;overflow:hidden}
+.side{width:215px;flex:0 0 215px;background:var(--card);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:14px 12px}
+.brand{display:flex;align-items:center;gap:9px;padding:6px 8px 14px}
+.logo{width:32px;height:32px;border-radius:9px;background:var(--primary-soft);display:grid;place-items:center;
+  flex:0 0 auto;color:var(--primary)}
+.brand .nm{font-weight:600;font-size:13.5px;letter-spacing:-0.02em;line-height:1.15}
+.brand .nm small{display:block;color:var(--mut);font-weight:400;font-size:10.5px;letter-spacing:0}
+.nav{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.tab{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-sm);cursor:pointer;
+  color:var(--mut);font-size:13px;font-weight:500;user-select:none;transition:background .12s,color .12s}
+.tab:hover{background:var(--line);color:var(--fg)}
+.tab.on{background:var(--primary-soft);color:var(--primary)}
+.tab .ic svg{width:16px;height:16px}
+.tab .n{margin-left:auto;font-size:10px;color:var(--faint);font-weight:600}
+.side .foot{margin-top:auto;display:flex;flex-direction:column;gap:7px;padding:8px}
+.badge{font-size:10.5px;font-weight:500;border:1px solid var(--primary);color:var(--primary);
+  border-radius:999px;padding:3px 9px;align-self:flex-start}
+.foot .meta{color:var(--faint);font-size:11px;line-height:1.4}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:13px 22px;border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-0.02em}
+.top .sub{color:var(--mut);font-size:12.5px;margin-right:auto}
+.projbar{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mut)}
+.body{flex:1;overflow:auto;padding:18px 22px}
+.wrap{max-width:820px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+input,textarea,select,button{font:inherit;color:var(--fg);border-radius:var(--r-sm);padding:8px 10px;
+  background:var(--input);border:1px solid var(--input-line);outline:none;letter-spacing:-0.01em}
+input:focus,textarea:focus,select:focus{border-color:var(--primary)}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+textarea{width:100%;min-height:150px;font:12px/1.5 var(--mono);resize:vertical}
+button{cursor:pointer;background:var(--line);border-color:transparent;font-weight:500;transition:.12s}
+button:hover{background:#383b41}
+button.primary{background:var(--primary);color:var(--primary-ink)}
+button.primary:hover{filter:brightness(1.08)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:9px;align-items:center;margin:10px 0;flex-wrap:wrap}
+.note{color:var(--mut);font-size:12px;line-height:1.5;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:11px 13px;margin:0 0 14px}
+.note.warn{border-color:#3a2f12;background:var(--warn-soft);color:var(--warn)}
+.note.bad{border-color:#3a1717;background:var(--bad-soft);color:var(--bad)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:13px 15px;margin:10px 0}
+.card h3{margin:0 0 8px;font-size:13px;font-weight:600}
+.kv{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px}
+.kv div{color:var(--mut)}.kv b{color:var(--fg);font-weight:600}
+.ok{color:var(--primary)}.fail{color:var(--bad)}.warnc{color:var(--warn)}
+small{color:var(--mut)}
+label.fld{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--mut)}
+label.fld input,label.fld select{width:100%}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pre{font:11.5px/1.5 var(--mono);background:var(--input);border:1px solid var(--input-line);border-radius:var(--r-sm);
+  padding:11px 13px;white-space:pre-wrap;max-height:300px;overflow:auto;color:#cfd3cf}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 13px;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:6px 0;font-size:13px}
+.prog{height:8px;background:var(--input);border-radius:6px;overflow:hidden;margin:8px 0}
+.prog > i{display:block;height:100%;background:var(--primary);width:0;transition:width .3s}
+.hist{display:flex;align-items:flex-end;gap:5px;height:70px;margin:8px 0}
+.hist .b{flex:1;background:var(--primary-soft);border-top:2px solid var(--primary);border-radius:3px 3px 0 0;
+  position:relative;min-height:2px}
+.hist .b span{position:absolute;bottom:-16px;left:0;right:0;text-align:center;font-size:9px;color:var(--faint)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:10px 0}
+.metric{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.metric .l{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+.metric .v{font-size:18px;font-weight:600;margin-top:2px}
+.adp{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin:9px 0}
+.adp .h{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.adp .h b{font-size:13.5px}
+.pill{font-size:10px;font-weight:600;border-radius:999px;padding:2px 8px;background:var(--primary-soft);color:var(--primary)}
+.pill.gray{background:var(--line);color:var(--mut)}
+</style></head><body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <div class="nm">MLX Master Trainer<small>local fine-tuning · MLX</small></div></div>
+    <nav class="nav">
+      <div class="tab on" data-p="model"   data-title="Model"    data-sub="pick any MLX base — convert, template, memory check"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></span>Model</div>
+      <div class="tab" data-p="data"        data-title="Data"     data-sub="any schema — auto-detect + templated preview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg></span>Data</div>
+      <div class="tab" data-p="eval"        data-title="Eval"     data-sub="define → audit → baseline → commit — the tool argues"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Eval</div>
+      <div class="tab" data-p="train"       data-title="Train"    data-sub="MLX LoRA — memory-guarded, live loss, versioned"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="2" y1="14" x2="6" y2="14"/><line x1="10" y1="8" x2="14" y2="8"/><line x1="18" y1="16" x2="22" y2="16"/></svg></span>Train</div>
+      <div class="tab" data-p="adapters"    data-title="Adapters" data-sub="versioned adapters — export GGUF/fused, quick test"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>Adapters<span class="n" id="nadp"></span></div>
+      <div class="tab" data-p="settings"    data-title="Settings" data-sub="HuggingFace token for gated/private bases"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>Settings</div>
+    </nav>
+    <div class="foot">
+      <span class="badge" id="rambadge">pure-local · MLX</span>
+      <div class="meta">data + models never leave the Mac</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1 id="ptitle">Model</h1></div>
+      <span class="sub" id="psub">pick any MLX base</span>
+      <div class="projbar">project
+        <select id="project"></select>
+        <button id="newproj">new</button></div>
+    </div>
+    <div class="body"><div class="wrap">
+
+      <!-- MODEL -->
+      <div class="panel on" id="model">
+        <div class="note">Pick <b>any</b> MLX-loadable base — a HuggingFace id (<code>mlx-community/*</code> or a convertible HF model) or a local path. We download/convert it, detect its <b>chat template</b> (the #1 thing naive trainers get wrong), and estimate memory before you train.</div>
+        <div class="row">
+          <select id="suggest" style="min-width:320px"></select>
+          <input id="customref" style="flex:1;min-width:200px" placeholder="…or paste a HF id / local path">
+        </div>
+        <div class="row"><label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="doconv">convert to MLX</label>
+          <label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="doquant">quantize 4-bit</label>
+          <button class="primary" id="prepare" style="margin-left:auto">prepare base</button></div>
+        <div id="prepout"></div>
+        <div id="modelcard"></div>
+      </div>
+
+      <!-- DATA -->
+      <div class="panel" id="data">
+        <div class="note">Paste JSONL or give a <code>.jsonl</code>/<code>.csv</code> path. We auto-detect the schema (<code>messages</code> / <code>prompt-completion</code> / <code>instruction</code>), apply the <b>selected base's</b> chat template, and show you the rendered example — exactly what the model trains on.</div>
+        <textarea id="raw" placeholder='one JSON per line, e.g.  {"instruction":"Translate to French","input":"Good morning","output":"Bonjour."}  — or {"messages":[...]}  — or {"prompt":"...","completion":"..."}'></textarea>
+        <div class="row">
+          <input id="dpath" style="flex:1" placeholder="…or a path to .jsonl / .csv">
+          <input id="dsystem" style="flex:1" placeholder="optional system prompt">
+        </div>
+        <div class="row">
+          <label class="fld">max_seq_len<input id="dmaxseq" type="number" value="2048" style="width:90px"></label>
+          <label class="fld">val_frac<input id="dval" type="number" step="0.05" value="0.1" style="width:80px"></label>
+          <button id="inspect">inspect</button>
+          <button class="primary" id="prepdata" disabled>prepare data →</button>
+        </div>
+        <div id="inspectout"></div>
+
+        <div class="card" style="margin-top:16px"><h3>Quality filter — the strict-basis move (Phase 3)</h3>
+          <div class="note">Accept a training example into the run only if it clears your quality bar; reject the rest and see <b>why</b>. <b>Reuse an eval's detector</b> so the standard you filter against is the standard you grade against. Non-destructive — the raw set is preserved; the kept subset is frozen (<code>DATASET.lock</code>) and feeds the trainer.</div>
+          <div class="row">
+            <select id="fsrc"><option value="eval">reuse an eval (filter == grade standard)</option><option value="independent">independent rule</option></select>
+            <span id="freuse" class="row" style="margin:0;gap:9px"><select id="feval" style="min-width:190px"></select>
+              <select id="fkeep"><option value="pass">keep examples that PASS it</option><option value="fail">keep examples that FAIL it</option></select></span>
+            <span id="findep" class="row" style="margin:0;gap:9px;display:none">
+              <select id="ftmpl"><option value="contains">contains</option><option value="length">length (words)</option><option value="nonempty">non-empty</option><option value="format_json">valid JSON</option><option value="refusal">refusal</option></select>
+              <input id="fspec" placeholder='spec JSON, e.g. {"pattern":"sorry"} or {"min_words":1,"max_words":3}' style="width:230px">
+              <select id="fkeep2"><option value="fail">keep examples that FAIL it</option><option value="pass">keep examples that PASS it</option></select></span>
+            <button class="primary" id="runfilter" style="margin-left:auto">run filter</button>
+          </div>
+          <div id="filterout"></div>
+        </div>
+
+        <div class="card"><h3>Dataset audit</h3>
+          <div class="row"><button id="auditbtn">audit the set</button>
+            <select id="ndeval" style="min-width:170px"></select><button id="ndbtn">near-dup check (optional)</button></div>
+          <div id="auditout"></div></div>
+
+        <div class="card"><h3>Deep semantic check — local embeddings (opt-in)</h3>
+          <div class="note">The checks above are <b>LEXICAL</b> (n-gram) and miss paraphrases. This runs a <b>local</b> embedding model (<code>all-MiniLM-L6-v2</code>, on-device, ~90 MB once then offline — <b>no text leaves the Mac</b>) for a <b>SEMANTIC</b> pass: train/eval contamination, in-dataset near-dup clusters, and diversity — all from one pass. Findings are review-not-block (similarity is fuzzy).</div>
+          <div class="row">
+            <select id="seval" style="min-width:180px"></select>
+            <label class="fld">threshold<input id="sthr" type="number" step="0.05" min="0.3" max="0.99" value="0.85" style="width:80px"></label>
+            <button class="primary" id="srun">run deep semantic check</button>
+          </div>
+          <div id="semout"></div>
+        </div>
+        <div class="note warn" id="contamwarn"></div>
+      </div>
+
+      <!-- EVAL (the discipline spine) -->
+      <div class="panel" id="eval">
+        <div class="note">The discipline is the <b>order</b>: <b>define → audit → baseline → commit → train</b>. The tool <b>blocks</b> meaningless evals and <b>argues</b> about weak ones — it would rather annoy you than let a result fool you. No eval can gate a model until it clears the audit and a baseline is measured.</div>
+        <div class="card"><h3>① Define an eval</h3>
+          <div class="row">
+            <select id="evsel" style="min-width:230px"></select>
+            <select id="ekind"><option value="template">template (no code)</option><option value="examples">example-based</option><option value="code">code scorer</option></select>
+            <input id="ename" placeholder="eval name" style="width:130px">
+            <label class="fld">max_tokens<input id="emax" type="number" value="64" style="width:78px"></label>
+          </div>
+          <div class="row" id="tmplrow"><select id="etmpl" style="min-width:420px"></select></div>
+          <div class="row" id="exrow" style="display:none">
+            <div style="flex:1"><small>good outputs (one per line)</small><textarea id="egood" style="min-height:64px"></textarea></div>
+            <div style="flex:1"><small>bad outputs (one per line)</small><textarea id="ebad" style="min-height:64px"></textarea></div></div>
+          <div id="coderow" style="display:none"><small>scorer.py — <code>def score(inp, output, expected) -&gt; {'ok':bool,'score':0..1}</code></small>
+            <textarea id="ecode" placeholder="def score(inp, output, expected=None):&#10;    return {'ok': (expected or '').lower() in output.lower(), 'score': 1.0}"></textarea></div>
+          <div id="dsrow"><small>eval dataset — one JSON per line: <code>{"input": "...", "expected": "..."}</code> (held-out — not your training data)</small>
+            <textarea id="eds" placeholder='{"input":"Give the capital of France.","expected":"Paris"}'></textarea></div>
+          <div class="row"><input id="espec" style="flex:1" placeholder='advanced spec JSON (optional) — e.g. {"labels":["pos","neg"]} or {"pattern":"OK","regex":true}'>
+            <button class="primary" id="createeval">create + freeze eval</button></div>
+        </div>
+        <div id="pipeout"></div>
+      </div>
+
+      <!-- TRAIN -->
+      <div class="panel" id="train">
+        <div class="note">MLX LoRA, in an isolated subprocess (peak memory reclaimed on exit — the <b>memory guard</b> for the 24GB budget). Versioned, reproducible adapters (config + seed + data hash). Live loss below.</div>
+        <div id="preregbanner"></div>
+        <div class="grid">
+          <label class="fld">version<input id="tver" placeholder="run-name (optional)"></label>
+          <label class="fld">fine-tune<select id="tftype"><option>lora</option><option>dora</option></select></label>
+          <label class="fld">rank<input id="trank" type="number" value="8"></label>
+          <label class="fld">scale (alpha)<input id="tscale" type="number" value="16"></label>
+          <label class="fld">dropout<input id="tdrop" type="number" step="0.05" value="0"></label>
+          <label class="fld">num_layers<input id="tlayers" type="number" value="16"></label>
+          <label class="fld">learning_rate<input id="tlr" type="text" value="1e-4"></label>
+          <label class="fld">iters<input id="titers" type="number" value="100"></label>
+          <label class="fld">batch_size<input id="tbatch" type="number" value="1"></label>
+          <label class="fld">max_seq_len<input id="tmaxseq" type="number" value="2048"></label>
+          <label class="fld" style="grid-column:span 2">target_modules (blank = auto)<input id="ttargets" placeholder="self_attn.q_proj, self_attn.v_proj"></label>
+        </div>
+        <div class="row"><label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="tgrad">gradient checkpointing</label>
+          <button id="tprecheck">memory pre-check</button>
+          <button class="primary" id="tstart" style="margin-left:auto">start training</button>
+          <button id="tstop" disabled>stop</button></div>
+        <div id="precheckout"></div>
+        <div id="liveout"></div>
+        <div id="gatewrap"></div>
+      </div>
+
+      <!-- ADAPTERS -->
+      <div class="panel" id="adapters">
+        <div class="note">Every run is a versioned, reproducible adapter. Export to <b>GGUF</b> (llama.cpp/Ollama), fused MLX, or adapter-only — and quick-test it before exporting. (Full eval is Phase 2.)</div>
+        <div id="adplist"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="settings">
+        <div class="note">A HuggingFace token is only needed for <b>gated or private</b> base models — public bases download without one. Stored locally in <code>~/.mlx-master-trainer/config.json</code> (chmod 600), never committed. No user data ever leaves the machine.</div>
+        <div class="row"><input id="hfkey" type="password" style="flex:1" placeholder="HuggingFace token (hf_…)"><button class="primary" id="hfsave">save</button><button id="hfclear">clear</button></div>
+        <div id="hfstatus" class="note"></div>
+      </div>
+
+    </div></div>
+  </main>
+</div>
+<script>
+const $=s=>document.querySelector(s), J=(u,b)=>fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(r=>r.json()), G=u=>fetch(u).then(r=>r.json());
+let ST={project:null, base:null};
+
+// nav
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));t.classList.add("on");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));$("#"+t.dataset.p).classList.add("on");
+  $("#ptitle").textContent=t.dataset.title;$("#psub").textContent=t.dataset.sub;
+  if(t.dataset.p==="adapters")loadAdapters();
+  if(t.dataset.p==="settings")loadSettings();
+  if(t.dataset.p==="eval")loadEval();
+  if(t.dataset.p==="train")loadTrainGate();
+  if(t.dataset.p==="data")loadData();});
+
+// boot
+(async()=>{
+  const h=await G("/health"); $("#rambadge").textContent=`pure-local · ${h.ram_gb}GB RAM`;
+  const s=await G("/models/suggested");
+  $("#suggest").innerHTML='<option value="">— suggested bases —</option>'+s.models.map(m=>`<option value="${m.ref}">${m.ref}  ·  ${m.size} — ${m.note}</option>`).join("");
+  await loadProjects();
+})();
+
+async function loadProjects(){
+  const r=await G("/projects");
+  const sel=$("#project");
+  sel.innerHTML=r.projects.map(p=>`<option value="${p.name}">${p.name}${p.base?' · '+(p.base.ref||'').split('/').pop():''}</option>`).join("")||'<option value="">(none)</option>';
+  if(r.projects.length){ ST.project=sel.value=r.projects[0].name; ST.base=r.projects.find(p=>p.name===ST.project)?.base||null; }
+  sel.onchange=async()=>{ST.project=sel.value; const pr=(await G("/projects")).projects.find(p=>p.name===ST.project); ST.base=pr?.base||null; ST.evalVersion=null; renderBase(); loadAdapters();};
+  renderBase();
+}
+$("#newproj").onclick=async()=>{const n=prompt("project name");if(!n)return;await J("/projects",{name:n});await loadProjects();$("#project").value=n;$("#project").onchange();};
+
+function renderBase(){
+  if(ST.base&&ST.base.info){const i=ST.base.info;
+    $("#modelcard").innerHTML=baseCard(i)+templateBtn(i.ref);bindTmpl();
+  } else { $("#modelcard").innerHTML=''; }
+}
+function baseCard(i){return `<div class="card"><h3>${i.ref}</h3><div class="kv">
+  <div>params <b>${i.params_str||'?'}</b></div><div>family <b>${i.family||'?'}</b></div>
+  <div>quant <b>${i.quantization}</b></div><div>chat template <b class="${i.has_chat_template?'ok':'warnc'}">${i.has_chat_template?'yes':'NONE'}</b></div>
+  <div>layers <b>${i.num_layers}</b></div><div>hidden <b>${i.hidden_size}</b></div></div>
+  ${i.has_chat_template?'':'<div class="note warn" style="margin:10px 0 0">no chat template — SFT will use raw prompt/completion. pick an -instruct base for chat formatting.</div>'}</div>`;}
+function templateBtn(ref){return `<div class="row"><button id="tmplbtn">show chat-template preview</button></div><div id="tmplout"></div>`;}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+
+// MODEL: prepare
+$("#prepare").onclick=async()=>{
+  const ref=$("#customref").value.trim()||$("#suggest").value;
+  if(!ref){alert("pick or paste a base");return;}
+  if(!ST.project){alert("create a project first (top right)");return;}
+  $("#prepout").innerHTML='<div class="note">preparing '+ref+' … (first time downloads weights)</div>';
+  await J("/models/prepare",{ref,convert:$("#doconv").checked,quantize:$("#doquant").checked});
+  const poll=setInterval(async()=>{const s=await G("/models/prepare/status");
+    if(s.state==="running"){$("#prepout").innerHTML='<div class="note">'+(s.log||[]).slice(-3).join("<br>")+'</div>';return;}
+    clearInterval(poll);
+    if(s.state==="error"){$("#prepout").innerHTML='<div class="note bad">prepare failed: '+s.error+'</div>';return;}
+    $("#prepout").innerHTML='<div class="note ok">✓ base ready</div>';
+    const sb=await J("/projects/set-base",{project:ST.project,ref});
+    ST.base={ref,local_path:s.path,info:sb.info};
+    $("#modelcard").innerHTML=baseCard(sb.info)+memCard(sb.info)+templateBtn(ref);
+    bindTmpl();await loadProjects();$("#project").value=ST.project;
+  },1200);
+};
+function memCard(i){return '';}
+function bindTmpl(){const b=$("#tmplbtn");if(b)b.onclick=async()=>{$("#tmplout").innerHTML='<div class=note>rendering…</div>';const t=await J("/models/template",{ref:ST.base.ref});$("#tmplout").innerHTML=t.rendered?'<div class=pre>'+esc(t.rendered)+'</div>':'<div class="note warn">'+(t.note||t.error||'no template')+'</div>';};}
+
+// DATA: inspect + prepare
+let LAST_DET=null;
+$("#inspect").onclick=async()=>{
+  if(!ST.project||!ST.base){alert("set a project base first (Model tab)");return;}
+  $("#inspectout").innerHTML='<div class="note">inspecting…</div>';
+  const r=await J("/data/inspect",{project:ST.project,raw_text:$("#raw").value,path:$("#dpath").value.trim()||null,
+    system:$("#dsystem").value.trim()||null,max_seq_len:+$("#dmaxseq").value,val_frac:+$("#dval").value});
+  if(r.error&&!r.detection){$("#inspectout").innerHTML='<div class="note bad">'+r.error+'</div>';return;}
+  LAST_DET=r.detection;
+  const v=r.validation, p=r.preview;
+  const hist=Object.entries(v.token_histogram||{});
+  const mx=Math.max(1,...hist.map(x=>x[1]));
+  $("#inspectout").innerHTML=`
+    <div class="card"><h3>schema: <span class="ok">${r.detection.schema}</span></h3>
+      <div class="kv"><div>mapping <b>${esc(JSON.stringify(r.detection.mapping))}</b></div>
+      <div>training format <b>${v.training_format}</b></div><div>usable <b>${v.n_usable}/${v.n_total}</b></div>
+      <div>train/val <b>${v.n_train}/${v.n_val}</b></div><div>tokens <b>${v.token_len.min}/${v.token_len.median}/${v.token_len.max}</b> (min/med/max)</div>
+      <div>over cap <b class="${v.n_over_cap?'warnc':'ok'}">${v.n_over_cap}</b></div></div>
+      <div class="hist">${hist.map(([k,n])=>`<div class="b" style="height:${Math.round(8+92*n/mx)}%" title="${k}: ${n}"><span>${k.split('-')[0]}</span></div>`).join("")}</div>
+      ${(v.warnings||[]).map(w=>`<div class="note warn" style="margin:6px 0 0">${w}</div>`).join("")}
+    </div>
+    <div class="card"><h3>rendered example #${p.index} — what the model trains on (${p.n_tokens} tokens)</h3>
+      <div class="pre">${esc(p.rendered||"")}</div></div>`;
+  $("#prepdata").disabled=false;
+};
+$("#prepdata").onclick=async()=>{
+  const r=await J("/data/prepare",{project:ST.project,raw_text:$("#raw").value,path:$("#dpath").value.trim()||null,
+    schema_name:LAST_DET.schema,mapping:LAST_DET.mapping,system:$("#dsystem").value.trim()||null,val_frac:+$("#dval").value});
+  $("#inspectout").innerHTML+=`<div class="note ok">✓ prepared: ${r.ingest.n_train} train / ${r.ingest.n_val} val (${r.ingest.training_format}) → go to Train</div>`;
+};
+
+// TRAIN
+function trainCfg(){const t=$("#ttargets").value.trim();
+  return {version:$("#tver").value.trim()||null,fine_tune_type:$("#tftype").value,rank:+$("#trank").value,
+    scale:+$("#tscale").value,dropout:+$("#tdrop").value,num_layers:+$("#tlayers").value,
+    learning_rate:parseFloat($("#tlr").value),iters:+$("#titers").value,batch_size:+$("#tbatch").value,
+    max_seq_len:+$("#tmaxseq").value,grad_checkpoint:$("#tgrad").checked,
+    target_modules:t?t.split(",").map(s=>s.trim()).filter(Boolean):null};}
+$("#tprecheck").onclick=async()=>{
+  if(!ST.project){alert("create a project");return;}
+  const r=await J("/precheck",{project:ST.project,batch_size:+$("#tbatch").value,max_seq_len:+$("#tmaxseq").value,
+    num_layers:+$("#tlayers").value,grad_checkpoint:$("#tgrad").checked});
+  $("#precheckout").innerHTML=`<div class="note ${r.fits?'':'bad'}">${r.fits?'✓ fits':'✗ likely OOM'} — est peak <b>${r.est_peak_gb}GB</b> of ${r.ram_gb}GB
+    (weights ${r.weight_gb} + act ${r.est_activation_gb})${r.advice.length?' · try: '+r.advice.join('; '):''}</div>`;
+};
+let pollT=null;
+$("#tstart").onclick=async()=>{
+  if(!ST.project){alert("create a project");return;}
+  const r=await J("/train/start",{project:ST.project,config:trainCfg()});
+  if(!r.ok){$("#liveout").innerHTML='<div class="note bad">'+r.error+'</div>';return;}
+  $("#tstart").disabled=true;$("#tstop").disabled=false;$("#tstop").dataset.v=r.version;
+  pollT=setInterval(()=>pollStatus(r.version),1500);pollStatus(r.version);
+};
+$("#tstop").onclick=async()=>{await J("/train/stop",{project:ST.project,version:$("#tstop").dataset.v});};
+async function pollStatus(version){
+  const s=await G("/train/status?project="+encodeURIComponent(ST.project)+"&version="+encodeURIComponent(version));
+  const pct=s.total_iters?Math.round(100*(s.iter||0)/s.total_iters):0;
+  const done=["done","error","stopped"].includes(s.state);
+  $("#liveout").innerHTML=`
+    <div class="metrics">
+      <div class="metric"><div class="l">state</div><div class="v ${s.state==='done'?'ok':(s.state==='error'?'fail':'')}">${s.state||'—'}</div></div>
+      <div class="metric"><div class="l">iter</div><div class="v">${s.iter||0}/${s.total_iters||'?'}</div></div>
+      <div class="metric"><div class="l">train loss</div><div class="v">${fmt(s.train_loss)}</div></div>
+      <div class="metric"><div class="l">val loss</div><div class="v">${fmt(s.val_loss)}</div></div>
+    </div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    <div class="row" style="font-size:12px;color:var(--mut)">tokens/sec ${fmt(s.tokens_per_sec)} · peak ${fmt(s.peak_mem_gb)}GB · eta ${s.eta_s!=null?s.eta_s+'s':'—'} · elapsed ${s.elapsed_s||0}s</div>
+    ${lossChart(s.history||[])}
+    ${s.memory&&!s.memory.fits?'<div class="note warn">memory: est peak '+s.memory.est_peak_gb+'GB on '+s.memory.ram_gb+'GB</div>':''}`;
+  if(done){clearInterval(pollT);$("#tstart").disabled=false;$("#tstop").disabled=true;loadAdapters();if(s.state==="done")offerGate(version);}
+}
+function fmt(x){return x==null?'—':(+x).toFixed(typeof x==='number'&&x<10?3:1);}
+function lossChart(h){
+  const pts=h.filter(p=>p.train_loss!=null);if(pts.length<2)return '';
+  const W=760,H=140,pad=24;const xs=pts.map(p=>p.iter),ys=pts.map(p=>p.train_loss);
+  const vy=pts.filter(p=>p.val_loss!=null);
+  const minx=Math.min(...xs),maxx=Math.max(...xs),allY=ys.concat(vy.map(p=>p.val_loss));
+  const miny=Math.min(...allY),maxy=Math.max(...allY);
+  const X=i=>pad+(W-2*pad)*(i-minx)/(maxx-minx||1), Y=v=>pad+(H-2*pad)*(1-(v-miny)/(maxy-miny||1));
+  const line=(arr,key,col)=>'<polyline fill="none" stroke="'+col+'" stroke-width="2" points="'+arr.filter(p=>p[key]!=null).map(p=>X(p.iter).toFixed(1)+','+Y(p[key]).toFixed(1)).join(" ")+'"/>';
+  return `<div class="card"><h3>loss</h3><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:150px">
+    ${line(pts,'train_loss','oklch(0.7511 0.1407 166.2284)')}${vy.length?line(pts,'val_loss','#e0a93a'):''}
+    <text x="${pad}" y="14" fill="#6b6e74" font-size="10">loss ${maxy.toFixed(2)} → ${miny.toFixed(2)}</text></svg>
+    <div class="row" style="font-size:11px;color:var(--mut)"><span class="ok">— train</span>${vy.length?'<span class="warnc">— val</span>':''}</div></div>`;
+}
+
+// ADAPTERS
+async function loadAdapters(){
+  if(!ST.project){$("#adplist").innerHTML='<div class="note">no project</div>';return;}
+  const r=await G("/adapters?project="+encodeURIComponent(ST.project));
+  $("#nadp").textContent=r.adapters.length||"";
+  if(!r.adapters.length){$("#adplist").innerHTML='<div class="note">no adapters yet — train one</div>';return;}
+  $("#adplist").innerHTML=r.adapters.map(a=>`
+    <div class="adp">
+      <div class="h"><b>${a.version}</b><span class="pill ${a.ok?'':'gray'}">${a.state}</span>
+        <small style="margin-left:auto">${a.created_at||''}</small></div>
+      <div class="kv"><div>base <b>${(a.base||'?').split('/').pop()}</b></div><div>rank <b>${a.rank}</b></div>
+        <div>scale <b>${a.scale}</b></div><div>iters <b>${a.iters}</b></div>
+        <div>final loss <b>${fmt(a.final_train_loss)}${a.final_val_loss!=null?' / '+fmt(a.final_val_loss)+' val':''}</b></div>
+        <div>data# <b>${a.data_hash||'?'}</b></div><div>runtime <b>${a.runtime_s||'?'}s</b></div></div>
+      <div class="row">
+        <button onclick="doExport('${a.version}','gguf',this)">export GGUF</button>
+        <button onclick="doExport('${a.version}','fused',this)">export fused</button>
+        <button onclick="doExport('${a.version}','adapter',this)">adapter path</button>
+        <input id="ip-${a.version}" style="flex:1;min-width:160px" placeholder="quick test prompt…">
+        <button class="primary" onclick="doInfer('${a.version}',this)">test</button></div>
+      <div id="exp-${a.version}"></div><div id="inf-${a.version}"></div>
+    </div>`).join("");
+}
+async function doExport(version,fmt,btn){btn.disabled=true;const o=$("#exp-"+version);o.innerHTML='<div class="note">exporting '+fmt+'…</div>';
+  const r=await J("/export",{project:ST.project,version,fmt});btn.disabled=false;
+  o.innerHTML=r.ok?`<div class="note ok">✓ ${r.fmt}: ${r.path}${r.size_mb?' ('+r.size_mb+'MB)':''}${r.note?'<br><small>'+r.note+'</small>':''}</div>`:`<div class="note bad">✗ ${r.error}</div>`;}
+async function doInfer(version,btn){const p=$("#ip-"+version).value.trim();if(!p)return;btn.disabled=true;
+  const o=$("#inf-"+version);o.innerHTML='<div class="note">generating…</div>';
+  const r=await J("/infer",{project:ST.project,version,prompt:p,max_tokens:120});btn.disabled=false;
+  o.innerHTML=r.ok?'<div class="pre">'+esc(r.output)+'</div>':'<div class="note bad">'+(r.error||'no output')+'</div>';}
+
+// SETTINGS
+async function loadSettings(){const r=await G("/settings");const h=r.hf;
+  $("#hfstatus").innerHTML=h.set?`<span class="ok">✓ HF token set</span> <small>(${h.masked} · ${h.source})</small>`:`no token — only needed for gated/private bases.`;}
+$("#hfsave").onclick=async()=>{await J("/settings",{hf_token:$("#hfkey").value.trim()});$("#hfkey").value="";loadSettings();};
+$("#hfclear").onclick=async()=>{await J("/settings",{hf_token:""});loadSettings();};
+window.doExport=doExport;window.doInfer=doInfer;
+
+// ---------- Phase 2: the discipline layer ----------
+ST.evalVersion=null;
+const PQ=(u,ev,t)=>`/${u}?project=${encodeURIComponent(ST.project)}&eval_version=${encodeURIComponent(ev)}`+(t?`&target=${encodeURIComponent(t)}`:'');
+function ekindUI(){const k=$("#ekind").value;
+  $("#tmplrow").style.display=k==="template"?"flex":"none";
+  $("#exrow").style.display=k==="examples"?"flex":"none";
+  $("#coderow").style.display=k==="code"?"block":"none";
+  $("#dsrow").style.display=k==="examples"?"block":"block";}
+$("#ekind").onchange=ekindUI;
+async function loadEval(){
+  if(!ST.project){$("#pipeout").innerHTML='<div class=note>create a project first</div>';return;}
+  if(!$("#etmpl").dataset.loaded){const t=await G("/eval/templates");
+    $("#etmpl").innerHTML=Object.entries(t.templates).map(([k,v])=>`<option value="${k}">${k} — ${v}</option>`).join("");$("#etmpl").dataset.loaded="1";}
+  const r=await G("/eval/list?project="+encodeURIComponent(ST.project));
+  $("#evsel").innerHTML='<option value="">— new eval —</option>'+r.evals.map(e=>`<option value="${e.version}" ${e.version===ST.evalVersion?'selected':''}>${e.name} · ${e.kind} · n=${e.n}${e.has_baseline?' · baseline✓':''}</option>`).join("");
+  ekindUI();renderPipeline();
+}
+$("#evsel").onchange=()=>{ST.evalVersion=$("#evsel").value||null;renderPipeline();};
+function parseDS(){return $("#eds").value.split("\n").map(l=>{l=l.trim();if(!l)return null;try{return JSON.parse(l)}catch{return null}}).filter(Boolean);}
+$("#createeval").onclick=async()=>{
+  if(!ST.project){alert("create a project first");return;}
+  const kind=$("#ekind").value;let spec={};
+  try{spec=$("#espec").value.trim()?JSON.parse($("#espec").value):{}}catch{alert("spec must be valid JSON");return;}
+  const body={project:ST.project,name:$("#ename").value.trim()||"eval",kind,max_tokens:+$("#emax").value||64,dataset:parseDS(),spec};
+  if(kind==="template")body.template=$("#etmpl").value;
+  if(kind==="examples"){spec.good=$("#egood").value.split("\n").map(s=>s.trim()).filter(Boolean);spec.bad=$("#ebad").value.split("\n").map(s=>s.trim()).filter(Boolean);body.spec=spec;}
+  if(kind==="code")body.scorer_code=$("#ecode").value;
+  const r=await J("/eval/create",body);ST.evalVersion=r.version;await loadEval();
+};
+async function renderPipeline(){
+  if(!ST.evalVersion){$("#pipeout").innerHTML='<div class=note>create or pick an eval to begin: <b>audit → baseline → commit → train</b>. The steps unlock in order — you can\'t set a bar before you know the baseline.</div>';return;}
+  const st=await G(PQ("pipeline",ST.evalVersion));
+  const blocks=(st.blocks||[]).map(b=>`<div class="note bad"><b>BLOCK · ${b.code}</b> — ${b.msg}<br><small>${b.why}</small>${b.detail?'<br><small>overlap: '+esc(JSON.stringify(b.detail))+'</small>':''}</div>`).join("");
+  const warns=(st.warns||[]).map(w=>`<div class="note warn"><b>WARN · ${w.code}</b> — ${w.msg}<br><small>${w.why}</small></div>`).join("");
+  const card=(n,label,done,body)=>`<div class="card"><h3>${done?'<span class=ok>✓</span>':n} ${label}</h3>${body}</div>`;
+  let html=card("②","Audit — the tool argues",st.audit_ok,(blocks||warns)?(blocks+warns):'<div class="note ok">clean — no quality issues found</div>');
+  const baseBody=st.audit_ok
+    ?(st.baseline_done?`<div class="note ok">baseline measured — ${metStr(st.baseline)}</div>`
+      :`<button class="primary" id="runbase">measure base model on this eval</button><div id="basestat"></div>`)
+    :'<small>fix the blocks above before you can baseline.</small>';
+  html+=card("③","Forced baseline (before/after)",st.baseline_done,baseBody);
+  let commitBody;
+  if(!st.baseline_done){commitBody='<small>measure the baseline first — no bar before you know what the base scores.</small>';}
+  else if(st.prereg_committed){commitBody='<div class="note ok">criteria committed + frozen → go to <b>Train</b></div>';}
+  else{commitBody=`<div class=row><select id="cmetric">${(st.metrics_available||['accuracy']).map(m=>`<option>${m}</option>`).join("")}</select>
+    <select id="ccomp"><option value="&gt;=">&ge;</option><option value="&lt;=">&le;</option></select>
+    <input id="cbar" type="number" placeholder="bar" style="width:84px">
+    <label class="fld" style="flex-direction:row;gap:5px;align-items:center"><input type="checkbox" id="cguard">guard metric</label>
+    <button class="primary" id="commitbtn">commit + freeze</button></div><div id="commitout"></div>`;}
+  html+=card("④","Pre-register — freeze before training",st.prereg_committed,commitBody);
+  $("#pipeout").innerHTML=html;
+  if($("#runbase"))$("#runbase").onclick=runBaseline;
+  if($("#commitbtn"))$("#commitbtn").onclick=commitPrereg;
+}
+function metStr(m){return Object.entries(m||{}).filter(([k,v])=>['accuracy','macro_f1','pass_rate','mean_score'].includes(k)).map(([k,v])=>`${k} ${v}`).join(' · ');}
+async function runBaseline(){$("#basestat").innerHTML='<div class=note>running the base model on the eval…</div>';
+  await J("/eval/run",{project:ST.project,eval_version:ST.evalVersion,target:"base"});
+  const p=setInterval(async()=>{const s=await G(PQ("eval/status",ST.evalVersion,"base"));
+    if(s.state==="running"){$("#basestat").innerHTML=`<div class=note>scoring ${s.done||0}/${s.total||'?'} · running acc ${s.running_acc??'—'}</div>`;return;}
+    if(s.state==="done"){clearInterval(p);renderPipeline();}
+    if(s.state==="error"){clearInterval(p);$("#basestat").innerHTML='<div class="note bad">baseline run failed</div>';}},1500);
+}
+async function commitPrereg(){
+  const crit=[{metric:$("#cmetric").value,comparator:$("#ccomp").value,bar:+$("#cbar").value,guard:$("#cguard").checked}];
+  const r=await J("/prereg/commit",{project:ST.project,eval_version:ST.evalVersion,criteria:crit});
+  if(!r.ok){$("#commitout").innerHTML=`<div class="note bad">${r.error}</div>`+((r.blocks||[]).map(b=>`<div class="note bad">${b.msg}</div>`).join(""));return;}
+  const w=(r.warns||[]).map(x=>`<div class="note warn"><b>${x.code}</b> — ${x.msg}<br><small>${x.why}</small></div>`).join("");
+  $("#commitout").innerHTML=w+'<div class="note ok">committed + frozen</div>';renderPipeline();loadTrainGate();
+}
+// Train-tab gate
+async function loadTrainGate(){
+  if(!ST.project)return;
+  const pr=await G("/prereg?project="+encodeURIComponent(ST.project));
+  if(pr.committed&&pr.prereg){const c=pr.prereg.criteria.map(x=>`${x.metric} ${x.comparator} ${x.bar}${x.guard?' (guard)':''}`).join(" · ");
+    $("#preregbanner").innerHTML=`<div class="note ok">pre-registered + frozen: <b>${esc(c)}</b> · eval <code>${pr.prereg.eval_version}</code> · baseline ${esc(metStr(pr.prereg.baseline))}</div>`;
+    $("#tstart").disabled=false;}
+  else{$("#preregbanner").innerHTML='<div class="note warn">no pre-registration committed — go to the <b>Eval</b> tab and complete <b>define → audit → baseline → commit</b> before training. The order is the discipline (you can\'t peek at results then set the bar).</div>';
+    $("#tstart").disabled=true;}
+}
+async function offerGate(version){
+  const pr=await G("/prereg?project="+encodeURIComponent(ST.project));
+  if(!(pr.committed&&pr.prereg)){$("#gatewrap").innerHTML='';return;}
+  $("#gatewrap").innerHTML=`<div class="card"><h3>Regression gate</h3>
+    <div class="note">Grade <b>${version}</b> against the pre-registered bar — base vs trained, every metric. Defaults to <b>discard</b> if it didn't earn keeping.</div>
+    <button class="primary" id="rungate">run frozen eval on this adapter → grade</button><div id="gateout"></div></div>`;
+  $("#rungate").onclick=()=>runGate(version,pr.prereg.eval_version);
+}
+async function runGate(version,evVer){
+  $("#gateout").innerHTML='<div class=note>running the frozen eval on the trained adapter…</div>';
+  await J("/eval/run",{project:ST.project,eval_version:evVer,target:version});
+  const p=setInterval(async()=>{const s=await G(PQ("eval/status",evVer,version));
+    if(s.state==="running"){$("#gateout").innerHTML=`<div class=note>scoring ${s.done||0}/${s.total||'?'}…</div>`;return;}
+    if(s.state==="error"){clearInterval(p);$("#gateout").innerHTML='<div class="note bad">eval failed</div>';return;}
+    if(s.state==="done"){clearInterval(p);const v=await J("/gate/verdict",{project:ST.project,adapter_version:version});renderGate(v,version);}
+  },1500);
+}
+function renderGate(v,version){
+  if(!v.ok){$("#gateout").innerHTML=`<div class="note bad">${v.error}</div>`;return;}
+  const rows=v.criteria_results.map(c=>`<div class=bar><span>${c.metric} ${c.comparator} ${c.bar}${c.guard?' (guard)':''}</span>
+    <span class="${c.passed?'ok':'fail'}">base ${c.base} → trained ${c.trained} (Δ${c.delta>=0?'+':''}${c.delta}) ${c.passed?'✓ PASS':'✗ FAIL'}${c.regressed?' ⚠ REGRESSED':''}</span></div>`).join("");
+  const sbs=v.side_by_side.map(s=>`<div class=bar><span>${s.metric}</span><span>base ${s.base} → trained ${s.trained} <small>(Δ${s.delta>=0?'+':''}${s.delta})</small></span></div>`).join("");
+  const dd=v.default_decision;
+  $("#gateout").innerHTML=`<div class=bar><b>verdict</b><span class="verdict ${v.all_pass&&!v.any_regress?'ok':'fail'}">${v.all_pass&&!v.any_regress?'MEETS CRITERIA':'DID NOT EARN KEEPING'}</span></div>
+    ${rows}<div style="margin-top:8px"><small>all measured metrics:</small></div>${sbs}
+    ${v.honest_null?`<div class="note">${v.honest_null}</div>`:''}
+    <div class=row><b>default: ${dd}</b>
+      <button class="${dd==='discard'?'':'primary'}" id="gdiscard" style="margin-left:auto">discard</button>
+      <button class="${dd==='keep'?'primary':''}" id="gkeep">keep${dd==='discard'?' (override)':''}</button></div>
+    <input id="greason" style="width:100%;margin-top:6px;display:${dd==='discard'?'block':'none'}" placeholder="${dd==='discard'?'reason required to keep a run that did not meet its bar…':''}">
+    <div id="gdecided"></div>`;
+  $("#gdiscard").onclick=()=>decide(version,"discard",null);
+  $("#gkeep").onclick=()=>decide(version,"keep",$("#greason").value.trim()||null);
+}
+async function decide(version,action,reason){
+  const r=await J("/gate/decide",{project:ST.project,adapter_version:version,action,reason});
+  $("#gdecided").innerHTML=r.ok?`<div class="note ok">recorded: <b>${r.decided}</b>${r.override?' (override)':''}${reason?' — '+esc(reason):''}</div>`
+    :`<div class="note bad">${r.error}</div>`;
+}
+
+// ---------- Phase 3: data prep + the strict-basis filter ----------
+$("#fsrc").onchange=()=>{const e=$("#fsrc").value==="eval";$("#freuse").style.display=e?"flex":"none";$("#findep").style.display=e?"none":"flex";};
+async function loadData(){
+  if(!ST.project)return;
+  const w=await G("/data/contamination-warning");
+  $("#contamwarn").innerHTML=`<b>⚠ ${w.msg}</b><br><small>${w.why}</small>`;
+  const r=await G("/eval/list?project="+encodeURIComponent(ST.project));
+  const opts='<option value="">— pick an eval —</option>'+r.evals.map(e=>`<option value="${e.version}">${e.name} · ${e.kind} · n=${e.n}</option>`).join("");
+  $("#feval").innerHTML=opts;$("#ndeval").innerHTML=opts;$("#seval").innerHTML=opts;
+  const fr=await G("/filter/report?project="+encodeURIComponent(ST.project));if(fr&&!fr.error)renderFilter(fr);else $("#filterout").innerHTML='';
+}
+$("#runfilter").onclick=async()=>{
+  if(!ST.project){alert("create a project");return;}
+  let rules,label;
+  if($("#fsrc").value==="eval"){const ev=$("#feval").value;if(!ev){alert("pick an eval to reuse");return;}
+    rules=[{name:"eval:"+ev.split('-')[0],source:"eval",eval_version:ev,keep_if:$("#fkeep").value,required:true}];label="reuse:eval:"+ev;}
+  else{let spec={};try{spec=$("#fspec").value.trim()?JSON.parse($("#fspec").value):{}}catch{alert("spec must be valid JSON");return;}
+    const t=$("#ftmpl").value;rules=[{name:t,source:"template",template:t,spec,keep_if:$("#fkeep2").value,required:true}];label="independent:"+t;}
+  $("#filterout").innerHTML='<div class=note>filtering against your standard…</div>';
+  renderFilter(await J("/filter/apply",{project:ST.project,rules,source_label:label}));
+};
+function renderFilter(r){
+  if(r.error){$("#filterout").innerHTML='<div class="note bad">'+r.error+'</div>';return;}
+  const buckets=Object.entries(r.buckets||{}).map(([k,v])=>`<div class=bar><span>rejected · <b>${k}</b></span><span class=fail>${v}</span></div>`).join("");
+  const ex=Object.entries(r.examples_by_reason||{}).flatMap(([k,arr])=>(arr||[]).map(e=>`<div class=bar><span><b>${k}</b> · ${esc((e.output||'').slice(0,70))}</span><button onclick="rescueEx(${e.idx},this)">rescue</button></div>`)).join("");
+  $("#filterout").innerHTML=`<div class="note ${r.n_rejected?'warn':'ok'}">kept <b>${r.n_kept}/${r.n_raw}</b> (${r.kept_pct}%) · rejected ${r.n_rejected} · <code>${r.source_label}</code> · <b>DATASET.lock frozen</b></div>
+    ${buckets}${ex?'<div style="margin-top:8px"><small>sample rejected — hand-rescue a false rejection (recorded):</small></div>'+ex:''}
+    ${(r.rescued&&r.rescued.length)?'<div class="note ok">rescued '+r.rescued.length+' example(s)</div>':''}`;
+}
+window.rescueEx=async(idx,btn)=>{const reason=prompt("reason to rescue this example:");if(!reason)return;btn.disabled=true;
+  const r=await J("/filter/rescue",{project:ST.project,idx,reason});if(r.ok){btn.textContent="rescued ✓";renderFilter(await G("/filter/report?project="+encodeURIComponent(ST.project)));}else alert(r.error);};
+$("#auditbtn").onclick=async()=>{$("#auditout").innerHTML='<div class=note>auditing the set…</div>';
+  const a=await G("/data/quality?project="+encodeURIComponent(ST.project));
+  if(a.error){$("#auditout").innerHTML='<div class="note bad">'+a.error+'</div>';return;}
+  const f=(a.findings||[]).map(x=>`<div class="note ${x.level==='warn'?'warn':''}"><b>${x.code}</b> — ${x.msg}<br><small>${x.why}</small></div>`).join("");
+  $("#auditout").innerHTML=`<div class="note">${esc(a.summary)}</div>${f||'<div class="note ok">no dataset-level issues found</div>'}`;};
+$("#ndbtn").onclick=async()=>{const ev=$("#ndeval").value;if(!ev){alert("pick an eval");return;}
+  $("#auditout").innerHTML='<div class=note>running the local near-dup heuristic…</div>';
+  const r=await J("/data/near-dup",{project:ST.project,eval_version:ev,threshold:0.6});
+  const rows=(r.flagged||[]).map(x=>`<div class=bar><span>${esc(x.eval_input)}</span><span class=warnc>~${x.similarity} → ${esc(x.nearest_train)}</span></div>`).join("");
+  $("#auditout").innerHTML=`<div class="note warn"><b>${r.n_flagged} near-duplicate eval/train pair(s)</b> at sim≥${r.threshold}<br><small>${r.method} — ${r.note}</small></div>${rows}`;};
+
+// ---------- semantic tier (opt-in local embeddings) ----------
+$("#srun").onclick=async()=>{
+  const ev=$("#seval").value;if(!ev){alert("pick an eval");return;}
+  const avail=await G("/semantic/available");
+  if(!avail.available){$("#semout").innerHTML='<div class="note bad">local embedding model not installed — run <code>uv pip install sentence-transformers</code> in the project venv. (kept opt-in so a quick run needs no heavy download.)</div>';return;}
+  const thr=+$("#sthr").value||0.85;
+  $("#semout").innerHTML='<div class=note>running local embedding pass (first time downloads ~90MB on-device, then offline)…</div>';
+  await J("/semantic/run",{project:ST.project,eval_version:ev,contam_threshold:thr});
+  const poll=setInterval(async()=>{const s=await G("/semantic/status?project="+encodeURIComponent(ST.project)+"&eval_version="+encodeURIComponent(ev));
+    if(s.state==="running"||s.state==="embedding"){$("#semout").innerHTML='<div class=note>'+s.state+'… (local, on-device)</div>';return;}
+    clearInterval(poll);
+    if(s.state==="error"){$("#semout").innerHTML='<div class="note bad">'+(s.error||'semantic pass failed')+'</div>';return;}
+    renderSemantic(await G("/semantic/report?project="+encodeURIComponent(ST.project)+"&eval_version="+encodeURIComponent(ev)));},1500);
+};
+function renderSemantic(r){
+  if(!r.ok){$("#semout").innerHTML='<div class="note bad">'+(r.error||'no report')+'</div>';return;}
+  const c=r.contamination, dv=r.diversity;
+  const pairs=(c.flagged||[]).map(f=>`<div class=bar><span>${esc(f.eval_input)}</span><span class=warnc>~${f.similarity} → ${esc(f.nearest_train)}</span></div>`).join("");
+  const dist=Object.entries(c.distribution||{}).map(([k,v])=>`${k}: ${v}`).join("  ·  ");
+  const dups=(r.near_duplicates.clusters||[]).map(cl=>`<div class=bar><span>cluster ×${cl.size}</span><span><small>${esc((cl.examples||[]).join("  |  "))}</small></span></div>`).join("");
+  $("#semout").innerHTML=`<div class="note ok"><b>SEMANTIC</b> (local embeddings) · ${r.n_eval} eval × ${r.n_train} train · ${r.method}</div>
+    <div class=bar><b>View 1 · train/eval contamination</b><span class="${c.n_flagged?'warnc':'ok'}">${c.n_flagged} flagged at ≥ ${r.contam_threshold} (review)</span></div>
+    <div class="note"><small>${c.guidance}</small></div>${pairs}
+    <div style="margin-top:6px"><small>nearest-pair distribution — ${dist}</small></div>
+    <div class=bar style="margin-top:10px"><b>View 2 · in-dataset semantic near-dup</b><span class="${r.near_duplicates.n_clusters?'warnc':'ok'}">${r.near_duplicates.n_clusters} cluster(s)</span></div>${dups}
+    <div class=bar style="margin-top:10px"><b>View 3 · diversity</b><span class="${dv.low_diversity?'warnc':'ok'}">mean cosine ${dv.mean_pairwise_cosine} · ~${dv.approx_clusters} clusters${dv.low_diversity?' · LOW':''}</span></div>
+    <div class="note">${r.honest}</div>`;
+}
+</script></body></html>

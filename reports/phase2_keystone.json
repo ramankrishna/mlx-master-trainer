@@ -1,0 +1,84 @@
+{
+  "base": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "project": "discipline-demo",
+  "checks": {
+    "block_tiny": {
+      "pass": true,
+      "detail": "5-example eval blocked"
+    },
+    "block_contamination": {
+      "pass": true,
+      "detail": "overlap: [['Give the capital city of the United States. Answer with only the city name.']]"
+    },
+    "good_eval_clean": {
+      "pass": true,
+      "detail": "blocks=[]"
+    },
+    "warn_single_metric": {
+      "pass": true,
+      "detail": "single-dimension warned"
+    },
+    "eval_frozen": {
+      "pass": true,
+      "detail": "EVAL.lock holds"
+    },
+    "ordering_gate_needs_prereg": {
+      "pass": true,
+      "detail": "no committed pre-registration \u2014 commit pass criter"
+    },
+    "baseline_ran": {
+      "pass": true,
+      "detail": "base accuracy=0.0 (n=22)"
+    },
+    "warn_bar_below_baseline": {
+      "pass": true,
+      "detail": "rubber-stamp bar warned"
+    },
+    "prereg_committed": {
+      "pass": true,
+      "detail": "bar accuracy>=20 frozen"
+    },
+    "trained_ran": {
+      "pass": true,
+      "detail": "final loss 0.16"
+    },
+    "gate_side_by_side": {
+      "pass": true,
+      "detail": "base 0.0 -> trained 4.5 | default=discard"
+    },
+    "keep_needs_reason": {
+      "pass": true,
+      "detail": "keep-without-reason refused"
+    },
+    "override_recorded": {
+      "pass": true,
+      "detail": "override + reason recorded"
+    },
+    "code_hatch_runs": {
+      "pass": true,
+      "detail": "custom scorer metrics: {'n': 22, 'accuracy': 0.0, 'pass_rate': 0.0, 'mean_score': 0.0}"
+    }
+  },
+  "gate": {
+    "base_acc": 0.0,
+    "trained_acc": 4.5,
+    "bar": 20,
+    "criteria": [
+      {
+        "metric": "accuracy",
+        "comparator": ">=",
+        "bar": 20,
+        "guard": false,
+        "base": 0.0,
+        "trained": 4.5,
+        "delta": 4.5,
+        "passed": false,
+        "regressed": false
+      }
+    ],
+    "default_decision": "discard",
+    "honest_null": "Training didn't clear the bar you committed to \u2014 that's a real result, not a mistake. You just avoided shipping a model that didn't earn it."
+  },
+  "runtime_s": 9.0,
+  "KEYSTONE_PASS": true
+}

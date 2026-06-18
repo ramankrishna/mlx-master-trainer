@@ -1,0 +1,39 @@
+# MLX Master Trainer — the public repo ships CODE only. No models, no user data, no keys.
+# (Note: keep comments on their OWN lines — an inline "# ..." becomes part of the pattern.)
+
+# environments / caches
+.venv/
+__pycache__/
+*.py[cod]
+.embcache.pkl
+models_cache/
+.cache/
+
+# user data + artifacts (pure-local: lives here, never committed)
+projects/
+*.gguf
+*.safetensors
+*.npz
+raw.jsonl
+filtered.jsonl
+rejected.jsonl
+
+# credentials / local config (never in the repo)
+config.json
+.env
+*.pem
+id_ed25519*
+
+# build artifacts
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+dist/
+build/
+*.spec
+*.dmg
+*.app
+node_modules/
+
+# os / logs
+.DS_Store
+*.log

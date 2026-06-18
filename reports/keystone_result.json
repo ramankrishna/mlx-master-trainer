@@ -1,0 +1,58 @@
+{
+  "base": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "checks": {
+    "base_loads": {
+      "pass": true,
+      "detail": "135M params \u00b7 llama \u00b7 quant=none (fp16/bf16) \u00b7 template=True"
+    },
+    "memory_fits_24gb": {
+      "pass": true,
+      "detail": "est_peak 2.7GB / ram 24.0GB (headroom 17.7GB)"
+    },
+    "schema_autodetect": {
+      "pass": true,
+      "detail": "detected 'instruction' mapping={'instruction': 'instruction', 'input': 'input', 'output': 'output'}"
+    },
+    "correct_template": {
+      "pass": true,
+      "detail": "format=messages \u00b7 preview head: '<|im_start|>system\\nYou are a helpful AI assistant named SmolLM, trained by Huggi'"
+    },
+    "training_runs": {
+      "pass": true,
+      "detail": "state=done runtime=8.8s"
+    },
+    "loss_drops": {
+      "pass": true,
+      "detail": "train loss 3.322 -> 0.452"
+    },
+    "export_gguf": {
+      "pass": true,
+      "detail": "/Users/ramakrishna/mlx-master-trainer/projects/keystone/exports/keystone-1781735386/gguf/ggml-model-f16.gguf"
+    },
+    "inference_test": {
+      "pass": true,
+      "detail": "'Ottoman.'"
+    }
+  },
+  "rendered_preview": "<|im_start|>system\nYou are a helpful AI assistant named SmolLM, trained by Hugging Face<|im_end|>\n<|im_start|>user\nTranslate to French\n\nGood morning<|im_end|>\n<|im_start|>assistant\nBonjour.<|im_end|>\n",
+  "validation": {
+    "n_usable": 24,
+    "training_format": "messages",
+    "token_len": {
+      "min": 41,
+      "median": 43,
+      "max": 53
+    },
+    "n_over_cap": 0,
+    "warnings": []
+  },
+  "loss_curve": {
+    "first": 3.322,
+    "last": 0.452,
+    "points": 13
+  },
+  "inference_output": "Ottoman.",
+  "version": "keystone-1781735386",
+  "runtime_s": 19.2,
+  "KEYSTONE_PASS": true
+}

@@ -1,0 +1,31 @@
+[package]
+name = "mlx-master-trainer"
+version = "0.1.0"
+description = "MLX Master Trainer — local Mac app for MLX LoRA fine-tuning (model-agnostic SFT engine)."
+authors = ["Rama Krishna Bachu <dude.npc@falconhash.xyz>"]
+edition = "2021"
+rust-version = "1.77"
+
+[lib]
+name = "mlx_master_trainer_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "macos-private-api", "image-png"] }
+tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
