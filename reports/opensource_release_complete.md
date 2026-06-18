@@ -55,6 +55,10 @@ flags. Unfrozen argv is byte-identical, so the dev flow and all prior keystones 
 These are intentionally **not** done because the public push is the operator's call and the `.dmg` is the release artifact:
 1. **Build the unsigned .dmg:** `cd desktop/src-tauri && cargo tauri build --target aarch64-apple-darwin`
    (needs `tauri-cli`; bundling the 733 MB sidecar → a ~700 MB+ dmg; the Tauri resource-glob may need one tweak — finalize when cutting the release).
+   - **Release freeze must bundle the frontend** (found during the local launch): add `--add-data "frontend:frontend"`
+     to the PyInstaller command so the frozen sidecar serves `frontend/index.html` (the API works without it, but the
+     UI 404s). In dev (`cargo run`) the sidecar is gated off (release-only, `cfg(not(debug_assertions))`) so the venv
+     backend serves the repo frontend + live edits — verified: the app launches, `GET /` → 200, UI loads.
 2. **Gatekeeper:** unsigned, so first launch needs right-click → Open, or `xattr -cr "/Applications/MLX Master Trainer.app"` —
    documented in the README; test on the built dmg.
 3. **Public push — GATE (cannot be done unilaterally):**

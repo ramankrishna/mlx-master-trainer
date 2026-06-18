@@ -50,15 +50,18 @@ fn spawn_backend(app: &AppHandle) -> Option<Child> {
     if port_open() {
         return None; // already up; don't double-bind
     }
-    // 1) shipped app: the PyInstaller-frozen sidecar bundled under Resources — NO user Python needed.
+    // 1) shipped (release) app: the PyInstaller-frozen sidecar bundled under Resources — NO user Python.
     //    (no args -> the FastAPI server; the frozen binary defaults its data root to ~/.mlx-master-trainer)
+    //    Release-only: in dev (cargo run) Tauri copies the resource into target/debug, but we want the venv
+    //    backend there so it serves the repo frontend + picks up source edits without a re-freeze.
+    #[cfg(not(debug_assertions))]
     if let Ok(res) = app.path().resource_dir() {
         let sidecar = res.join("mmt-backend").join("mmt-backend");
         if sidecar.exists() {
             return Command::new(sidecar).spawn().ok();
         }
     }
-    // 2) dev fallback: the venv python + server.py (MMT_ROOT / MMT_PYTHON overridable)
+    // 2) dev (and fallback): the venv python + server.py (MMT_ROOT / MMT_PYTHON overridable)
     let (py, server) = backend_paths();
     if !py.exists() || !server.exists() {
         eprintln!("backend not found: no bundled sidecar AND {} / {}", py.display(), server.display());
