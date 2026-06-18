@@ -5,7 +5,7 @@ adapters, loss parsing) and generalized:
   - FULL config via a generated mlx_lm YAML: rank / scale(alpha) / dropout / target-modules /
     fine-tune-type / num-layers / lr / iters / batch / max-seq-len / seed / grad-checkpoint.
   - MEMORY GUARD: training ALWAYS runs in a separate process (peak reclaimed on exit, the backend
-    never holds the optimizer), and models.memory_precheck warns BEFORE an OOM on the 24GB budget.
+    never holds the optimizer), and models.memory_precheck warns BEFORE an OOM on the machine's available RAM.
   - LIVE loss / tokens-sec / ETA streamed via a detached runner that writes status.json (the UI
     polls it). Versioned, reproducible adapters (config + seed + data hash recorded); never
     overwrites a prior adapter. Stop + resume supported.

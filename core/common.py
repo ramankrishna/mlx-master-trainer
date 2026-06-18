@@ -35,7 +35,7 @@ for _d in (PROJECTS, MODELS_CACHE):
 
 
 # --------------------------------------------------------------------------- #
-# system memory (the 24GB budget the memory-guard reasons about)
+# system memory (the available-RAM budget the memory-guard reasons about)
 # --------------------------------------------------------------------------- #
 def system_ram_gb() -> float:
     """Physical RAM in GB. Uses sysctl on macOS (no extra dep); /proc fallback on Linux."""

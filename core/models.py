@@ -24,8 +24,8 @@ SUGGESTED_BASES = [
     {"ref": "mlx-community/Llama-3.2-1B-Instruct-4bit", "size": "1B", "note": "native MLX 4-bit"},
     {"ref": "mlx-community/Qwen2.5-1.5B-Instruct-4bit", "size": "1.5B", "note": "native MLX 4-bit"},
     {"ref": "mlx-community/gemma-2-2b-it-4bit", "size": "2B", "note": "native MLX 4-bit"},
-    {"ref": "mlx-community/Phi-3.5-mini-instruct-4bit", "size": "3.8B", "note": "fits 24GB at 4-bit"},
-    {"ref": "mlx-community/Mistral-7B-Instruct-v0.3-4bit", "size": "7B", "note": "tight on 24GB — 4-bit only"},
+    {"ref": "mlx-community/Phi-3.5-mini-instruct-4bit", "size": "3.8B", "note": "compact at 4-bit"},
+    {"ref": "mlx-community/Mistral-7B-Instruct-v0.3-4bit", "size": "7B", "note": "larger — use the 4-bit build"},
 ]
 
 # Per-family LoRA target modules (suggested defaults; mlx_lm auto-picks if we pass none).
@@ -157,7 +157,7 @@ def chat_template_render(ref_or_path: str, messages: list[dict], add_generation_
 
 
 # --------------------------------------------------------------------------- #
-# memory pre-check (warn before OOM on the 24GB budget — not after)
+# memory pre-check (warn before OOM on the machine's available RAM — not after)
 # --------------------------------------------------------------------------- #
 def memory_precheck(info: dict, batch_size: int = 1, max_seq_len: int = 2048,
                     num_layers: int = 16, grad_checkpoint: bool = False) -> dict:
