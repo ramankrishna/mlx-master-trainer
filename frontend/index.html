@@ -51,6 +51,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--primary)}
 input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;width:14px;height:14px;flex:0 0 auto;
   padding:0;margin:0;border:0;border-radius:0;background:none;accent-color:var(--primary);
   vertical-align:middle;cursor:pointer}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mut);cursor:pointer;white-space:nowrap;user-select:none}
 input::placeholder,textarea::placeholder{color:var(--faint)}
 textarea{width:100%;min-height:150px;font:12px/1.5 var(--mono);resize:vertical}
 button{cursor:pointer;background:var(--line);border-color:transparent;font-weight:500;transition:.12s}
@@ -127,8 +128,8 @@ label.fld input:not([type=checkbox]),label.fld select{width:100%}
           <select id="suggest" style="min-width:320px"></select>
           <input id="customref" style="flex:1;min-width:200px" placeholder="…or paste a HF id / local path">
         </div>
-        <div class="row"><label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="doconv">convert to MLX</label>
-          <label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="doquant">quantize 4-bit</label>
+        <div class="row"><label class="chk"><input type="checkbox" id="doconv">convert to MLX</label>
+          <label class="chk"><input type="checkbox" id="doquant">quantize 4-bit</label>
           <button class="primary" id="prepare" style="margin-left:auto">prepare base</button></div>
         <div id="prepout"></div>
         <div id="modelcard"></div>
@@ -223,7 +224,7 @@ label.fld input:not([type=checkbox]),label.fld select{width:100%}
           <label class="fld">max_seq_len<input id="tmaxseq" type="number" value="2048"></label>
           <label class="fld" style="grid-column:span 2">target_modules (blank = auto)<input id="ttargets" placeholder="self_attn.q_proj, self_attn.v_proj"></label>
         </div>
-        <div class="row"><label class="fld" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="tgrad">gradient checkpointing</label>
+        <div class="row"><label class="chk"><input type="checkbox" id="tgrad">gradient checkpointing</label>
           <button id="tprecheck">memory pre-check</button>
           <button class="primary" id="tstart" style="margin-left:auto">start training</button>
           <button id="tstop" disabled>stop</button></div>
@@ -486,7 +487,7 @@ async function renderPipeline(){
   else{commitBody=`<div class=row><select id="cmetric">${(st.metrics_available||['accuracy']).map(m=>`<option>${m}</option>`).join("")}</select>
     <select id="ccomp"><option value="&gt;=">&ge;</option><option value="&lt;=">&le;</option></select>
     <input id="cbar" type="number" placeholder="bar" style="width:84px">
-    <label class="fld" style="flex-direction:row;gap:5px;align-items:center"><input type="checkbox" id="cguard">guard metric</label>
+    <label class="chk"><input type="checkbox" id="cguard">guard metric</label>
     <button class="primary" id="commitbtn">commit + freeze</button></div><div id="commitout"></div>`;}
   html+=card("④","Pre-register — freeze before training",st.prereg_committed,commitBody);
   $("#pipeout").innerHTML=html;
