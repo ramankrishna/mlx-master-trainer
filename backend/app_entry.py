@@ -48,4 +48,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import multiprocessing
+    multiprocessing.freeze_support()   # PyInstaller: stop spawned children (torch/resource_tracker) from
+    main()                             # re-executing the program (which clashed on the server port)

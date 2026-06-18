@@ -46,13 +46,22 @@ fn port_open() -> bool {
 }
 
 /// Spawn the backend unless something is already serving the port (e.g. a dev run).
-fn spawn_backend() -> Option<Child> {
+fn spawn_backend(app: &AppHandle) -> Option<Child> {
     if port_open() {
         return None; // already up; don't double-bind
     }
+    // 1) shipped app: the PyInstaller-frozen sidecar bundled under Resources — NO user Python needed.
+    //    (no args -> the FastAPI server; the frozen binary defaults its data root to ~/.mlx-master-trainer)
+    if let Ok(res) = app.path().resource_dir() {
+        let sidecar = res.join("mmt-backend").join("mmt-backend");
+        if sidecar.exists() {
+            return Command::new(sidecar).spawn().ok();
+        }
+    }
+    // 2) dev fallback: the venv python + server.py (MMT_ROOT / MMT_PYTHON overridable)
     let (py, server) = backend_paths();
     if !py.exists() || !server.exists() {
-        eprintln!("backend not found: {} / {}", py.display(), server.display());
+        eprintln!("backend not found: no bundled sidecar AND {} / {}", py.display(), server.display());
         return None;
     }
     Command::new(py).arg(server).spawn().ok()
@@ -79,7 +88,7 @@ pub fn run() {
             #[cfg(target_os = "macos")]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
-            let child = spawn_backend();
+            let child = spawn_backend(app.handle());
             *app.state::<Backend>().0.lock().unwrap() = child;
 
             // The bundled page loads at the tauri:// origin, from which WKWebView blocks fetch()

@@ -258,3 +258,52 @@ the planted France-capital cluster; diversity mean-cosine 0.146; pure-local (no 
 Honest residual (stated): semantic catches paraphrase but still MISSES semantically-distant leakage (same
 answer, very different framing), is threshold-sensitive, and is only as good as the embedding model —
 evidence, not proof. Same posture as the firewall + the n-gram pass. Decisions mmt-001..023.
+
+# ───────────────────────── Open-source packaging: downloadable .dmg (MIT open-core) ─────────────────────────
+Package MMT as a downloadable .dmg + open-source it (MIT core). The hard part: the Tauri shell spawned a
+Python venv; a stranger's Mac has none. So FREEZE the Python/MLX backend into a standalone binary
+(PyInstaller) shipped as a Tauri sidecar — the .app runs with NO user Python. Unsigned (Gatekeeper documented).
+
+## mmt-024 — Stage 0 credential gate (PASSED) + .gitignore
+Open-sourcing makes all history world-readable, so the gate ran FIRST. Result: ~/mlx-master-trainer was NOT
+a git repo → fresh `git init` = NO history to leak (safest start). Working tree clean of credential patterns;
+no token; ~/.mlx-master-trainer/config.json never created. THE DEEPSEEK KEY NEVER TOUCHED MMT (that's a
+bigbugai-bro credential; MMT has no DeepSeek dependency, grep-confirmed) — so for this repo the leak risk is
+nil (rotation is broader hygiene, not a blocker here). Wrote .gitignore (code only). A staging guard CAUGHT
+projects/ being staged — an inline `#` comment had broken the `projects/` pattern (gitignore comments must be
+on their own line); fixed; re-verified 108 code-only files, 4.7MB, zero creds/data/models. Committed locally.
+
+## mmt-025 — PyInstaller freeze (DONE — it RUNS standalone, not just builds)
+Froze backend/app_entry.py --onedir → 733MB (mlx + mlx_lm + tokenizers + transformers + sentence-transformers
++ torch; PyInstaller followed the imports so the semantic tier is bundled too). FROZEN KEYSTONE
+(reports/frozen_keystone.json) PASS 4/4, tested OUTSIDE the dev venv: --selftest real MLX matmul=4096 +
+embed_dim=384 · frozen server /health ok · a FULL LoRA train through the frozen backend (started→done, loss
+0.331) with ZERO user Python. The "built ≠ runs" risk was real — caught + fixed TWO bugs: (1) missing
+multiprocessing.freeze_support() (torch/resource-tracker children re-execed the binary → fell through to
+start-the-server → port clash + hang); (2) data root pointed INSIDE the read-only bundle — split code-root
+from a writable DATA_ROOT (~/.mlx-master-trainer, env-overridable MMT_DATA_ROOT). The frozen-aware dispatch
+(backend/app_entry.py + core/common.py runner_argv/mlx_argv) re-invokes the binary with --run/--mlx flags
+since a bundle has no `python -m`/source scripts; unfrozen argv is byte-identical (dev flow + all keystones intact).
+
+## mmt-026 — Tauri sidecar wiring (DONE; native build pending)
+src/lib.rs spawn_backend() spawns the bundled frozen binary from resource_dir()/mmt-backend/mmt-backend (no
+args → server; frozen default data root ~/.mlx-master-trainer), dev fallback to venv + server.py.
+tauri.conf.json bundles ../dist/mmt-backend as a resource. `rustup target add aarch64-apple-darwin` (Phase-1
+toolchain was x86_64). cargo check (host) PASSES — the wiring compiles.
+
+## mmt-027/028 — unsigned .dmg + Gatekeeper + first-run (BUILD PENDING, gated with the push)
+Not built: `cargo tauri build --target aarch64-apple-darwin` is the release step (needs tauri-cli; bundles the
+733MB sidecar → ~700MB+ dmg; the Tauri resource-glob may need one tweak — finalize when cutting the release).
+Gatekeeper (unsigned): first launch needs right-click→Open or `xattr -cr` — documented in the README. First-run:
+ships code only; base models + MiniLM download on first use; pure-local after; data root ~/.mlx-master-trainer.
+
+## mmt-029 — MIT open-core repo prep (DONE)
+LICENSE (MIT, Falcon Hash), README (what it is + the wedge + install/Gatekeeper steps + first-run + Apple-Silicon
+req + build-from-source + honest limits [lexical+semantic both "evidence not proof"] + open-core note),
+CONTRIBUTING (+ pure-local/honesty principles). 2 local commits; repo push-ready.
+
+## RELEASE — GATED on operator (not done by the assistant)
+Public push = publishing public content → needs explicit operator authorization + the GitHub destination, and
+the assistant cannot/should not push unilaterally. Key rotation = operator-only (moot for this repo). When
+authorized: push the history-clean repo + attach the .dmg to a GitHub Release (not committed — .dmg gitignored).
+Report: reports/opensource_release_complete.md. Decisions mmt-001..029.

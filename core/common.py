@@ -19,9 +19,15 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-PROJECTS = ROOT / "projects"
-MODELS_CACHE = ROOT / "models_cache"            # converted/native MLX models we materialize
+ROOT = Path(__file__).resolve().parents[1]      # CODE root (dev). In a frozen bundle this is inside the .app.
+FROZEN = getattr(sys, "frozen", False)
+# DATA root — where user projects + the model cache live. A frozen .app can't write inside its read-only
+# bundle, so use a user dir; overridable via MMT_DATA_ROOT (the frozen keystone points it at the dev repo
+# to reuse fixtures). Dev: the repo itself.
+DATA_ROOT = Path(os.environ.get("MMT_DATA_ROOT") or
+                 (Path.home() / ".mlx-master-trainer" if FROZEN else ROOT))
+PROJECTS = DATA_ROOT / "projects"
+MODELS_CACHE = DATA_ROOT / "models_cache"        # converted/native MLX models we materialize
 CONFIG_FILE = Path.home() / ".mlx-master-trainer" / "config.json"
 
 for _d in (PROJECTS, MODELS_CACHE):
@@ -129,9 +135,6 @@ def write_json(p: Path, obj) -> None:
 # (identical to the dev path). Frozen: sys.executable IS the bundled binary, so re-invoke IT with a
 # dispatch flag (handled by backend/app_entry.py) — there is no `python -m` or source path in a bundle.
 # --------------------------------------------------------------------------- #
-FROZEN = getattr(sys, "frozen", False)
-
-
 def runner_argv(name: str, *args) -> list[str]:
     if FROZEN:
         return [sys.executable, "--run", name, *args]

@@ -28,6 +28,7 @@
   "bundle": {
     "active": true,
     "targets": ["app", "dmg"],
+    "resources": { "../dist/mmt-backend": "mmt-backend" },
     "category": "DeveloperTool",
     "copyright": "Copyright © 2026 Falcon Hash. All rights reserved.",
     "shortDescription": "Local MLX LoRA fine-tuning studio — pure-local, model-agnostic.",

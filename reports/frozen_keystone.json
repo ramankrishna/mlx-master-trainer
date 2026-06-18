@@ -1,0 +1,28 @@
+{
+  "checks": {
+    "binary_exists": {
+      "pass": true,
+      "detail": "/Users/ramakrishna/mlx-master-trainer/desktop/dist/mmt-backend/mmt-backend"
+    },
+    "selftest_mlx_op": {
+      "pass": true,
+      "detail": "SELFTEST OK \u00b7 frozen=True \u00b7 mlx matmul sum=4096.0 \u00b7 embed_dim=384"
+    },
+    "frozen_server_boots": {
+      "pass": true,
+      "detail": "/health -> {'ok': True, 'app': 'MLX Master Trainer', 'phase': 1, 'ram_gb': 24.0, 'pure_local': True}"
+    },
+    "frozen_train_e2e": {
+      "pass": true,
+      "detail": "started=True state=done loss=0.331"
+    }
+  },
+  "frozen_train": {
+    "version": "frozen-1781790852",
+    "state": "done",
+    "final_train_loss": 0.331,
+    "iters": 20
+  },
+  "size_mb": 733,
+  "KEYSTONE_PASS": true
+}
