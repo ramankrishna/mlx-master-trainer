@@ -17,7 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core import eval as evalmod          # noqa: E402
 from core import projects                 # noqa: E402
-from core.common import ROOT, read_json, write_json   # noqa: E402
+from core.common import ROOT, read_json, runner_argv, write_json   # noqa: E402
 
 
 def _run_dir(project: str, eval_version: str, target: str) -> Path:
@@ -46,7 +46,7 @@ def start_eval(project: str, eval_version: str, target: str = "base",
     write_json(rd / "job.json", job)
     write_json(rd / "status.json", {"state": "starting", "target": target, "done": 0, "total": 0})
     boot = (rd / "boot.log").open("w")
-    proc = subprocess.Popen([sys.executable, str(ROOT / "core" / "run_eval.py"), "--job", str(rd / "job.json")],
+    proc = subprocess.Popen(runner_argv("eval", "--job", str(rd / "job.json")),
                             stdout=boot, stderr=subprocess.STDOUT, start_new_session=True)
     return {"ok": True, "target": target, "runner_pid": proc.pid}
 

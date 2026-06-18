@@ -20,7 +20,7 @@ import time
 from pathlib import Path
 
 from . import models, projects
-from .common import ROOT, read_json, write_json
+from .common import ROOT, read_json, runner_argv, write_json
 
 DEFAULT_CFG = {
     "rank": 8, "scale": 16.0, "dropout": 0.0, "target_modules": None,    # None -> mlx_lm auto-picks
@@ -84,8 +84,7 @@ def start(project: str, cfg: dict) -> dict:
                                       "total_iters": full["iters"], "history": []})
 
     boot = (adir / "boot.log").open("w")
-    proc = subprocess.Popen([sys.executable, str(ROOT / "core" / "run_train.py"),
-                             "--job", str(adir / "job.json")],
+    proc = subprocess.Popen(runner_argv("train", "--job", str(adir / "job.json")),
                             stdout=boot, stderr=subprocess.STDOUT, start_new_session=True)
     write_json(adir / "runner.json", {"runner_pid": proc.pid})
     return {"ok": True, "version": version, "adapter_dir": str(adir), "runner_pid": proc.pid}

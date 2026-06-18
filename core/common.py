@@ -122,3 +122,23 @@ def write_json(p: Path, obj) -> None:
     tmp = p.with_suffix(p.suffix + ".tmp")
     tmp.write_text(json.dumps(obj, indent=2))
     tmp.replace(p)               # atomic: a poll never reads a half-written status file
+
+
+# --------------------------------------------------------------------------- #
+# frozen-aware subprocess argv (PyInstaller). Unfrozen: `python core/run_X.py` / `python -m mlx_lm.X`
+# (identical to the dev path). Frozen: sys.executable IS the bundled binary, so re-invoke IT with a
+# dispatch flag (handled by backend/app_entry.py) — there is no `python -m` or source path in a bundle.
+# --------------------------------------------------------------------------- #
+FROZEN = getattr(sys, "frozen", False)
+
+
+def runner_argv(name: str, *args) -> list[str]:
+    if FROZEN:
+        return [sys.executable, "--run", name, *args]
+    return [sys.executable, str(ROOT / "core" / f"run_{name}.py"), *args]
+
+
+def mlx_argv(sub: str, *args) -> list[str]:
+    if FROZEN:
+        return [sys.executable, "--mlx", sub, *args]
+    return [sys.executable, "-m", f"mlx_lm.{sub}", *args]

@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .common import MODELS_CACHE, get_token, sanitize_ref, system_ram_gb
+from .common import MODELS_CACHE, get_token, mlx_argv, sanitize_ref, system_ram_gb
 
 # Curated MLX-friendly instruct bases (suggestions only — any HF id / local path works).
 SUGGESTED_BASES = [
@@ -68,7 +68,7 @@ def convert_to_mlx(ref: str, quantize: bool = False, q_bits: int = 4,
         progress(f"already converted: {out.name}")
         return out
     src = str(ensure_local(ref, progress)) if not is_local(ref) else str(Path(ref).expanduser())
-    cmd = [sys.executable, "-m", "mlx_lm.convert", "--hf-path", src, "--mlx-path", str(out), "--dtype", dtype]
+    cmd = mlx_argv("convert", "--hf-path", src, "--mlx-path", str(out), "--dtype", dtype)
     if quantize:
         cmd += ["-q", "--q-bits", str(q_bits)]
     progress(f"converting -> MLX ({'q'+str(q_bits) if quantize else dtype}) …")

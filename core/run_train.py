@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from core import models, train as traincfg          # noqa: E402
-from core.common import data_hash, read_json, write_json    # noqa: E402
+from core.common import data_hash, mlx_argv, read_json, write_json    # noqa: E402
 
 ITER = re.compile(r"Iter\s+(\d+):")
 TRAIN = re.compile(r"Train loss\s+([\d.]+)")
@@ -61,7 +61,7 @@ def main() -> None:
     # 3) run mlx_lm.lora, stream stdout -> run.log + status.json
     log = (adir / "run.log").open("w")
     t0 = time.time()
-    proc = subprocess.Popen([sys.executable, "-m", "mlx_lm.lora", "-c", str(adir / "config.yaml")],
+    proc = subprocess.Popen(mlx_argv("lora", "-c", str(adir / "config.yaml")),
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
     set_status(state="running", train_pid=proc.pid)
     history, last_train, last_val, last_toks, last_mem = [], None, None, None, None

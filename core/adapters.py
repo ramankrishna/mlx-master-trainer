@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 from . import projects
-from .common import read_json
+from .common import mlx_argv, read_json
 
 
 def _base_path(project: str) -> str | None:
@@ -56,8 +56,8 @@ def fuse(project: str, version: str, dequantize: bool = False, progress=lambda m
         return {"ok": False, "error": f"adapter '{version}' has no weights"}
     out = projects.project_dir(project) / "exports" / version / "fused"
     out.mkdir(parents=True, exist_ok=True)
-    cmd = [sys.executable, "-m", "mlx_lm.fuse", "--model", str(base),
-           "--adapter-path", str(adapter), "--save-path", str(out)]
+    cmd = mlx_argv("fuse", "--model", str(base),
+                   "--adapter-path", str(adapter), "--save-path", str(out))
     if dequantize:
         cmd.append("--dequantize")
     progress("fusing base + adapter …")
@@ -84,8 +84,8 @@ def export(project: str, version: str, fmt: str = "fused", progress=lambda m: No
         out = exdir / "fused"
         gguf = exdir / "gguf"
         gguf.mkdir(parents=True, exist_ok=True)
-        cmd = [sys.executable, "-m", "mlx_lm.fuse", "--model", str(base), "--adapter-path", str(adapter),
-               "--save-path", str(out), "--export-gguf", "--gguf-path", str(gguf / "ggml-model-f16.gguf")]
+        cmd = mlx_argv("fuse", "--model", str(base), "--adapter-path", str(adapter),
+                       "--save-path", str(out), "--export-gguf", "--gguf-path", str(gguf / "ggml-model-f16.gguf"))
         progress("fusing + exporting GGUF (llama/mistral-family archs) …")
         r = subprocess.run(cmd, capture_output=True, text=True)
         f = gguf / "ggml-model-f16.gguf"
@@ -105,8 +105,8 @@ def quick_infer(project: str, version: str, prompt: str, system: str | None = No
     adapter = _adapter_dir(project, version)
     if not (adapter / "adapters.safetensors").exists():
         return {"ok": False, "error": f"adapter '{version}' has no weights"}
-    cmd = [sys.executable, "-m", "mlx_lm.generate", "--model", str(base), "--adapter-path", str(adapter),
-           "--prompt", prompt, "--max-tokens", str(max_tokens), "--temp", str(temp)]
+    cmd = mlx_argv("generate", "--model", str(base), "--adapter-path", str(adapter),
+                   "--prompt", prompt, "--max-tokens", str(max_tokens), "--temp", str(temp))
     if system:
         cmd += ["--system-prompt", system]
     r = subprocess.run(cmd, capture_output=True, text=True)

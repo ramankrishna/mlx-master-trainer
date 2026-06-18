@@ -26,7 +26,7 @@ from pathlib import Path
 
 from . import eval as evalmod
 from . import projects
-from .common import ROOT, read_json, write_json
+from .common import ROOT, read_json, runner_argv, write_json
 
 MODEL_NAME = "all-MiniLM-L6-v2"
 _MODEL = None
@@ -184,7 +184,7 @@ def start(project: str, eval_version: str, contam_threshold: float = 0.85, dup_t
     write_json(rd / "job.json", job)
     write_json(rd / "status.json", {"state": "running"})
     boot = (rd / "boot.log").open("w")
-    proc = subprocess.Popen([sys.executable, str(ROOT / "core" / "run_semantic.py"), "--job", str(rd / "job.json")],
+    proc = subprocess.Popen(runner_argv("semantic", "--job", str(rd / "job.json")),
                             stdout=boot, stderr=subprocess.STDOUT, start_new_session=True)
     return {"ok": True, "started": True, "runner_pid": proc.pid}
 
