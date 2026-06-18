@@ -7,7 +7,6 @@ eval. Every finding explains WHY in plain language (teach the judgment, don't ju
 BLOCK (cannot gate until fixed):
   - too_small        n below a hard floor (20): the pass/fail is noise.
   - contamination    an eval example is also in the training data: the cardinal sin.
-  - no_held_out      the eval looks sampled from train (not a genuine held-out set).
   - missing_expected the template needs a label/answer per example and some are missing.
 WARN (allowed, but argued):
   - bar_below_baseline  the bar is at/below what the BASE already scores — rubber-stamping.
@@ -88,10 +87,6 @@ def audit(project: str, eval_version: str, proposed_criteria: list | None = None
             "tells you nothing about generalization. This is the cardinal sin of eval. Remove the "
             "overlapping examples or build a genuine held-out set.",
             detail=[d["input"][:80] for d in overlap[:5]])
-    elif train and n and len(overlap) == 0 and len(train) and (len(overlap) / max(1, n)) > 0.5:
-        add(blocks, "no_held_out", "eval appears sampled from the training set",
-            "An eval drawn from training data isn't held out — it can't show generalization. Use inputs "
-            "the model never trained on.")
 
     if _needs_expected(ev):
         missing = sum(1 for d in ds if d.get("expected", "") in (None, ""))
