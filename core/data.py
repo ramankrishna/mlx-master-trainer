@@ -18,17 +18,24 @@ from pathlib import Path
 # ---- schema detection -------------------------------------------------------
 def load_rows(text_or_path: str) -> list[dict]:
     """Accept a path to .jsonl/.json/.csv, or raw JSONL text. Returns list of dict rows."""
-    p = Path(text_or_path).expanduser()
-    if p.exists() and p.is_file():
-        raw = p.read_text()
-        if p.suffix.lower() == ".csv":
-            return list(csv.DictReader(io.StringIO(raw)))
-        if p.suffix.lower() == ".json":
-            obj = json.loads(raw)
-            return obj if isinstance(obj, list) else [obj]
-        text = raw                                  # .jsonl
-    else:
-        text = text_or_path                         # raw pasted JSONL
+    text = text_or_path
+    # Treat the input as a filesystem path ONLY if it's plausibly one: a single line within the OS
+    # filename limit. Pasted JSONL is multi-line / long, and Path.exists() would raise OSError
+    # ([Errno 63] File name too long) on it — so guard before ever touching the filesystem.
+    s = text_or_path.strip()
+    if s and "\n" not in s and len(s) <= 1024:
+        try:
+            p = Path(s).expanduser()
+            if p.exists() and p.is_file():
+                raw = p.read_text()
+                if p.suffix.lower() == ".csv":
+                    return list(csv.DictReader(io.StringIO(raw)))
+                if p.suffix.lower() == ".json":
+                    obj = json.loads(raw)
+                    return obj if isinstance(obj, list) else [obj]
+                text = raw                          # .jsonl
+        except OSError:
+            pass                                    # not a usable path — fall through to raw text
     rows = []
     for line in text.splitlines():
         line = line.strip()
